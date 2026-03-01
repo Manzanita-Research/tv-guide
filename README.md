@@ -36,6 +36,19 @@ export TV_CODE_DIR="$HOME/code/manzanita-research"  # where you clone repos loca
 # TV_CODE_DIR defaults to ~/code/$TV_GH_ORG if unset
 ```
 
+The `linear` channel reads `TV_LINEAR_STATUS` to filter by issue state. Pair it with shell aliases:
+
+```sh
+alias tv-seeds='TV_LINEAR_STATUS=Seeds tv linear'
+alias tv-soil='TV_LINEAR_STATUS=Soil tv linear'
+alias tv-growing='TV_LINEAR_STATUS=Growing tv linear'
+alias tv-ready='TV_LINEAR_STATUS=Ready tv linear'
+```
+
+These map to [magpie](https://github.com/manzanita-research/magpie) statuses — you can use any Linear state name (e.g. `Backlog`, `In Review`, `Done`).
+
+Without the env var, `tv linear` shows all issues.
+
 ## Requirements
 
 - [television](https://github.com/alexpasmantier/television)

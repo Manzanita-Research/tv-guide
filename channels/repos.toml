@@ -80,9 +80,15 @@ gh repo view "$ORG/$REPO" --json description,isPrivate,pushedAt,defaultBranchRef
 ' '''
 
 [keybindings]
-enter = "actions:cd"
+enter = "actions:zellij"
 ctrl-o = "actions:open"
 ctrl-c = "actions:clone"
+ctrl-d = "actions:cd"
+
+[actions.zellij]
+description = "Open in new Zellij tab"
+command = '''bash -c 'REPO="{strip_ansi|split:  :0}"; LOCAL_DIR="${TV_CODE_DIR:-$HOME/code/$TV_GH_ORG}"; DIR="$LOCAL_DIR/$REPO"; if [ -d "$DIR" ]; then zellij action new-tab --name "$REPO" --cwd "$DIR"; else echo "not cloned locally — use ctrl-c to clone first"; sleep 2; fi' '''
+mode = "fork"
 
 [actions.cd]
 description = "Open in terminal"

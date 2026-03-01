@@ -1,0 +1,85 @@
+[metadata]
+name = "manzanita"
+description = "Browse Manzanita Research projects — local + GitHub"
+requirements = ["bash"]
+
+[source]
+# Merge local dirs and remote repos, deduplicate, tag each with where it lives
+command = '''bash -c '
+LOCAL_DIR="$HOME/code/manzanita-research"
+local_repos=$(ls -1 "$LOCAL_DIR" 2>/dev/null | grep -v "^\\." | grep -v "^CLAUDE")
+remote_repos=$(gh repo list manzanita-research --limit 100 --json name --jq ".[].name" 2>/dev/null)
+all_repos=$(printf "%s\n%s" "$local_repos" "$remote_repos" | sort -u | grep -v "^$")
+for repo in $all_repos; do
+  has_local=false; has_remote=false
+  [ -d "$LOCAL_DIR/$repo" ] && has_local=true
+  echo "$remote_repos" | grep -qx "$repo" && has_remote=true
+  if $has_local && $has_remote; then
+    printf "\033[32m%s\033[39m  \033[36m[local + github]\033[39m\n" "$repo"
+  elif $has_local; then
+    printf "\033[32m%s\033[39m  \033[33m[local only]\033[39m\n" "$repo"
+  else
+    printf "\033[32m%s\033[39m  \033[35m[github only]\033[39m\n" "$repo"
+  fi
+done
+' '''
+ansi = true
+output = "{strip_ansi|split:  :0}"
+
+[ui]
+layout = "portrait"
+
+[preview]
+command = '''bash -c '
+REPO="{strip_ansi|split:  :0}"
+LOCAL="$HOME/code/manzanita-research/$REPO"
+if [ -d "$LOCAL" ]; then
+  echo "  📂 $LOCAL"
+  echo ""
+  if [ -d "$LOCAL/.git" ]; then
+    cd "$LOCAL"
+    echo "  last commit:"
+    git log -1 --pretty=format:"  %C(yellow)%h%Creset %s (%cr)" 2>/dev/null
+    echo ""; echo ""
+    echo "  branches:"
+    git branch --color=always 2>/dev/null | head -5 | sed "s/^/  /"
+    echo ""
+  fi
+  if [ -f "$LOCAL/README.md" ]; then
+    echo "  ─────────────────────────────────"
+    head -30 "$LOCAL/README.md" | sed "s/^/  /"
+  fi
+else
+  echo "  not cloned locally"
+  echo ""
+fi
+echo ""
+gh repo view "manzanita-research/$REPO" --json description,isPrivate,pushedAt,defaultBranchRef --jq "
+  \"  github: manzanita-research/\(env.REPO // \"$REPO\")\",
+  \"  \(if .isPrivate then \"🔒 private\" else \"🌐 public\" end)\",
+  \"  default branch: \(.defaultBranchRef.name // \"n/a\")\",
+  \"  last push: \(.pushedAt // \"n/a\")\",
+  \"\",
+  \"  \(.description // \"\")\"
+" 2>/dev/null || echo "  (not on github)"
+' '''
+
+[keybindings]
+enter = "actions:cd"
+ctrl-o = "actions:open"
+ctrl-c = "actions:clone"
+
+[actions.cd]
+description = "Open in terminal"
+command = '''bash -c 'DIR="$HOME/code/manzanita-research/{strip_ansi|split:  :0}"; if [ -d "$DIR" ]; then cd "$DIR" && $SHELL; else echo "not cloned — use ctrl-c to clone first"; sleep 2; fi' '''
+mode = "execute"
+
+[actions.open]
+description = "Open on GitHub"
+command = "gh repo view manzanita-research/'{strip_ansi|split:  :0}' --web"
+mode = "fork"
+
+[actions.clone]
+description = "Clone to ~/code/manzanita-research/"
+command = "gh repo clone manzanita-research/'{strip_ansi|split:  :0}' ~/code/manzanita-research/'{strip_ansi|split:  :0}'"
+mode = "execute"

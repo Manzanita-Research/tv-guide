@@ -1,0 +1,29 @@
+[metadata]
+name = "linear"
+description = "Search Linear issues via linctl"
+requirements = ["linctl", "jq"]
+
+[source]
+command = '''linctl issue list -j --limit 100 --newer-than all_time | jq -r '.[] | "\u001b[36m\(.identifier)\u001b[39m  \u001b[33m[\(.state.name)]\u001b[39m  \(.title)"' '''
+ansi = true
+output = "{strip_ansi|split:  :0}"
+
+[ui]
+layout = "portrait"
+preview_panel = { header = '{strip_ansi|split:  :0}' }
+
+[preview]
+command = "linctl issue get '{strip_ansi|split:  :0}' -p"
+
+[keybindings]
+enter = "actions:open"
+
+[actions.open]
+description = "Open issue in browser"
+command = "linctl issue get '{strip_ansi|split:  :0}' -j | jq -r '.url' | xargs open"
+mode = "fork"
+
+[actions.assign-me]
+description = "Assign issue to me"
+command = "linctl issue assign '{strip_ansi|split:  :0}' me"
+mode = "fork"

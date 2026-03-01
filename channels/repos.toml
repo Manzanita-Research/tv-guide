@@ -1,14 +1,14 @@
 [metadata]
-name = "manzanita"
-description = "Browse Manzanita Research projects — local + GitHub"
-requirements = ["bash"]
+name = "repos"
+description = "Browse a GitHub org's repos — local + remote merged. Set TV_GH_ORG and TV_CODE_DIR in your shell."
+requirements = ["bash", "gh"]
 
 [source]
-# Merge local dirs and remote repos, deduplicate, tag each with where it lives
 command = '''bash -c '
-LOCAL_DIR="$HOME/code/manzanita-research"
+ORG="${TV_GH_ORG:?set TV_GH_ORG to your github org}"
+LOCAL_DIR="${TV_CODE_DIR:-$HOME/code/$ORG}"
 local_repos=$(ls -1 "$LOCAL_DIR" 2>/dev/null | grep -v "^\\." | grep -v "^CLAUDE")
-remote_repos=$(gh repo list manzanita-research --limit 100 --json name --jq ".[].name" 2>/dev/null)
+remote_repos=$(gh repo list "$ORG" --limit 100 --json name --jq ".[].name" 2>/dev/null)
 all_repos=$(printf "%s\n%s" "$local_repos" "$remote_repos" | sort -u | grep -v "^$")
 for repo in $all_repos; do
   has_local=false; has_remote=false
@@ -31,10 +31,12 @@ layout = "portrait"
 
 [preview]
 command = '''bash -c '
+ORG="${TV_GH_ORG}"
+LOCAL_DIR="${TV_CODE_DIR:-$HOME/code/$ORG}"
 REPO="{strip_ansi|split:  :0}"
-LOCAL="$HOME/code/manzanita-research/$REPO"
+LOCAL="$LOCAL_DIR/$REPO"
 if [ -d "$LOCAL" ]; then
-  echo "  📂 $LOCAL"
+  echo "  local: $LOCAL"
   echo ""
   if [ -d "$LOCAL/.git" ]; then
     cd "$LOCAL"
@@ -54,9 +56,9 @@ else
   echo ""
 fi
 echo ""
-gh repo view "manzanita-research/$REPO" --json description,isPrivate,pushedAt,defaultBranchRef --jq "
-  \"  github: manzanita-research/\(env.REPO // \"$REPO\")\",
-  \"  \(if .isPrivate then \"🔒 private\" else \"🌐 public\" end)\",
+gh repo view "$ORG/$REPO" --json description,isPrivate,pushedAt,defaultBranchRef --jq "
+  \"  github: $ORG/$REPO\",
+  \"  \(if .isPrivate then \"private\" else \"public\" end)\",
   \"  default branch: \(.defaultBranchRef.name // \"n/a\")\",
   \"  last push: \(.pushedAt // \"n/a\")\",
   \"\",
@@ -71,15 +73,15 @@ ctrl-c = "actions:clone"
 
 [actions.cd]
 description = "Open in terminal"
-command = '''bash -c 'DIR="$HOME/code/manzanita-research/{strip_ansi|split:  :0}"; if [ -d "$DIR" ]; then cd "$DIR" && $SHELL; else echo "not cloned — use ctrl-c to clone first"; sleep 2; fi' '''
+command = '''bash -c 'LOCAL_DIR="${TV_CODE_DIR:-$HOME/code/$TV_GH_ORG}"; DIR="$LOCAL_DIR/{strip_ansi|split:  :0}"; if [ -d "$DIR" ]; then cd "$DIR" && $SHELL; else echo "not cloned — use ctrl-c to clone first"; sleep 2; fi' '''
 mode = "execute"
 
 [actions.open]
 description = "Open on GitHub"
-command = "gh repo view manzanita-research/'{strip_ansi|split:  :0}' --web"
+command = '''bash -c 'gh repo view "$TV_GH_ORG/{strip_ansi|split:  :0}" --web' '''
 mode = "fork"
 
 [actions.clone]
-description = "Clone to ~/code/manzanita-research/"
-command = "gh repo clone manzanita-research/'{strip_ansi|split:  :0}' ~/code/manzanita-research/'{strip_ansi|split:  :0}'"
+description = "Clone locally"
+command = '''bash -c 'LOCAL_DIR="${TV_CODE_DIR:-$HOME/code/$TV_GH_ORG}"; gh repo clone "$TV_GH_ORG/{strip_ansi|split:  :0}" "$LOCAL_DIR/{strip_ansi|split:  :0}"' '''
 mode = "execute"

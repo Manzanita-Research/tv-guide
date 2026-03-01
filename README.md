@@ -4,12 +4,16 @@ Custom [television](https://github.com/alexpasmantier/television) channels for t
 
 Television is a fast, hackable fuzzy finder for the terminal. These channels wire it into our workflow.
 
+![repos channel](screenshots/repos.png)
+
+![linear channel](screenshots/linear.png)
+
 ## Channels
 
 | Channel | Command | What it does |
 |---|---|---|
 | `repos` | `tv repos` | Browse a GitHub org's repos merged with your local clones. Tags each as `[local + github]`, `[local only]`, or `[github only]`. |
-| `linear` | `tv linear` | Fuzzy search all Linear issues. Preview shows full detail. Enter opens in browser. |
+| `linear` | `tv linear` | Fuzzy search all Linear issues. Preview shows full detail. Enter copies a Claude Code prompt. |
 | `my-issues` | `tv my-issues` | Same, filtered to issues assigned to you. |
 | `caspar` | `tv caspar` | Placeholder for when Caspar ships. |
 
@@ -61,12 +65,14 @@ Without the env var, `tv linear` shows all issues.
 ## Keybindings
 
 **repos:**
-- `enter` — cd into local clone
+- `enter` — open in new Zellij tab
 - `ctrl-o` — open on GitHub
 - `ctrl-c` — clone repo locally
+- `ctrl-d` — cd into local clone
 
 **linear / my-issues:**
-- `enter` — open issue in browser
+- `enter` — copy Claude Code prompt to clipboard
+- `ctrl-o` — open issue in browser
 - `assign-me` action — assign issue to yourself
 
 ## Adding a channel

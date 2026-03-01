@@ -8,18 +8,31 @@ command = '''bash -c '
 ORG="${TV_GH_ORG:?set TV_GH_ORG to your github org}"
 LOCAL_DIR="${TV_CODE_DIR:-$HOME/code/$ORG}"
 local_repos=$(ls -1 "$LOCAL_DIR" 2>/dev/null | grep -v "^\\." | grep -v "^CLAUDE")
-remote_repos=$(gh repo list "$ORG" --limit 100 --json name --jq ".[].name" 2>/dev/null)
-all_repos=$(printf "%s\n%s" "$local_repos" "$remote_repos" | sort -u | grep -v "^$")
+
+# tab-separated: name\tdescription (one per line)
+gh_data=$(gh repo list "$ORG" --limit 100 --json name,description --jq ".[] | .name + \"\t\" + (.description // \"\")" 2>/dev/null)
+remote_names=$(echo "$gh_data" | cut -f1)
+
+all_repos=$(printf "%s\n%s" "$local_repos" "$remote_names" | sort -u | grep -v "^$")
+
 for repo in $all_repos; do
   has_local=false; has_remote=false
   [ -d "$LOCAL_DIR/$repo" ] && has_local=true
-  echo "$remote_repos" | grep -qx "$repo" && has_remote=true
-  if $has_local && $has_remote; then
-    printf "\033[32m%s\033[39m  \033[36m[local + github]\033[39m\n" "$repo"
-  elif $has_local; then
-    printf "\033[32m%s\033[39m  \033[33m[local only]\033[39m\n" "$repo"
+  echo "$remote_names" | grep -qx "$repo" && has_remote=true
+
+  desc=$(echo "$gh_data" | grep "^${repo}	" | head -1 | cut -f2-)
+  if [ -n "$desc" ]; then
+    left="\033[32m$repo\033[39m  \033[90m$desc\033[39m"
   else
-    printf "\033[32m%s\033[39m  \033[35m[github only]\033[39m\n" "$repo"
+    left="\033[32m$repo\033[39m"
+  fi
+
+  if $has_local && $has_remote; then
+    printf "%b  \033[36m[local + github]\033[39m\n" "$left"
+  elif $has_local; then
+    printf "%b  \033[33m[local only]\033[39m\n" "$left"
+  else
+    printf "%b  \033[35m[github only]\033[39m\n" "$left"
   fi
 done
 ' '''

@@ -1,0 +1,10 @@
+[metadata]
+name = "caspar"
+description = "Search Caspar commands and resources (placeholder)"
+requirements = ["echo"]
+
+[source]
+command = '''echo -e "caspar publish\ncaspar preview\ncaspar themes\ncaspar posts\ncaspar pages\ncaspar members\ncaspar settings\ncaspar deploy"'''
+
+[preview]
+command = "echo 'Caspar is not yet implemented — this is a placeholder channel for when manzanita-research/caspar ships'"

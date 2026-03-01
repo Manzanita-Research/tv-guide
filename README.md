@@ -1,6 +1,6 @@
 # tv-guide
 
-Custom [television](https://github.com/alexpasmantier/television) channels for the tools we actually use — Linear, GitHub orgs, and (eventually) ghostctl.
+Custom [television](https://github.com/alexpasmantier/television) channels for the tools we actually use — Linear, GitHub orgs, and (eventually) [Caspar](https://github.com/manzanita-research/caspar).
 
 Television is a fast, hackable fuzzy finder for the terminal. These channels wire it into our workflow.
 
@@ -11,7 +11,7 @@ Television is a fast, hackable fuzzy finder for the terminal. These channels wir
 | `repos` | `tv repos` | Browse a GitHub org's repos merged with your local clones. Tags each as `[local + github]`, `[local only]`, or `[github only]`. |
 | `linear` | `tv linear` | Fuzzy search all Linear issues. Preview shows full detail. Enter opens in browser. |
 | `my-issues` | `tv my-issues` | Same, filtered to issues assigned to you. |
-| `ghostctl` | `tv ghostctl` | Placeholder for when ghostctl ships. |
+| `caspar` | `tv caspar` | Placeholder for when Caspar ships. |
 
 ## Install
 
@@ -25,6 +25,8 @@ cd tv-guide
 ```
 
 The install script symlinks channels into `~/.config/television/cable/`.
+
+The Linear channels (`linear`, `my-issues`) require [linctl](https://github.com/dorkitude/linctl) — follow the install instructions in that repo.
 
 ## Configuration
 

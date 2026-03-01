@@ -4,7 +4,7 @@ description = "Search Linear issues via linctl"
 requirements = ["linctl", "jq"]
 
 [source]
-command = '''bash -c 'STATE_FLAG=""; [ -n "$TV_LINEAR_STATUS" ] && STATE_FLAG="--state $TV_LINEAR_STATUS"; linctl issue list -j --limit 100 --newer-than all_time $STATE_FLAG | jq -r ".[] | \"\\u001b[36m\\(.identifier)\\u001b[39m  \\u001b[33m[\\(.state.name)]\\u001b[39m  \\(.title)\""' '''
+command = '''bash -c 'STATE_FLAG=""; [ -n "$TV_LINEAR_STATUS" ] && STATE_FLAG="--state $TV_LINEAR_STATUS"; linctl issue list -j --limit 100 --newer-than all_time $STATE_FLAG | jq -r "if type == \"array\" then .[] | \"\\u001b[36m\\(.identifier)\\u001b[39m  \\u001b[33m[\\(.state.name)]\\u001b[39m  \\(.title)\" else empty end"' '''
 ansi = true
 output = "{strip_ansi|split:  :0}"
 

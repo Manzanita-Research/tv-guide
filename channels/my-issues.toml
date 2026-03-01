@@ -4,7 +4,7 @@ description = "Search Linear issues assigned to me"
 requirements = ["linctl", "jq"]
 
 [source]
-command = '''linctl issue list -j --limit 100 --assignee me --newer-than all_time | jq -r '.[] | "\u001b[36m\(.identifier)\u001b[39m  \u001b[33m[\(.state.name)]\u001b[39m  \(.title)"' '''
+command = '''linctl issue list -j --limit 100 --assignee me --newer-than all_time | jq -r 'if type == "array" then .[] | "\u001b[36m\(.identifier)\u001b[39m  \u001b[33m[\(.state.name)]\u001b[39m  \(.title)" else empty end' '''
 ansi = true
 output = "{strip_ansi|split:  :0}"
 

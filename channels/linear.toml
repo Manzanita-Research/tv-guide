@@ -16,11 +16,17 @@ preview_panel = { header = '{strip_ansi|split:  :0}' }
 command = "linctl issue get '{strip_ansi|split:  :0}' -p"
 
 [keybindings]
-enter = "actions:open"
+enter = "actions:copy-prompt"
+ctrl-o = "actions:open"
 
 [actions.open]
 description = "Open issue in browser"
 command = "linctl issue get '{strip_ansi|split:  :0}' -j | jq -r '.url' | xargs open"
+mode = "fork"
+
+[actions.copy-prompt]
+description = "Copy Claude Code prompt"
+command = "printf \"let's work on {strip_ansi|split:  :0}\" | pbcopy"
 mode = "fork"
 
 [actions.assign-me]
